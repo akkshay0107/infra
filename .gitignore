@@ -1,0 +1,42 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Data & Persistence
+data/
+*.db
+*.sqlite3
+*.csv
+*.pem
+
+# Docker
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# Logs
+*.log
+logs/
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
