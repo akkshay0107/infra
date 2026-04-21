@@ -17,7 +17,14 @@ localhost {
     handle /showdown/* {
         reverse_proxy ps-server:8000
     }
+    handle_path /~~showdown* {
+        reverse_proxy login:3001
+    }
     handle /api/* {
         reverse_proxy login:3001
+    }
+
+    handle {
+        file_server
     }
 }

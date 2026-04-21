@@ -43,8 +43,8 @@ db.serialize(() => {
     csvContent += `${username},${password}\n`;
   };
 
-  // Bot User
-  insertUser('Bot', 'secure_bot_password_123'); // matching .env
+  // user for the rl bot (takes pwd from .env)
+  insertUser('Bot', process.env.BOT_PASSWORD);
 
   // 250 Participants
   for (let i = 1; i <= 250; i++) {

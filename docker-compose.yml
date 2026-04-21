@@ -37,8 +37,9 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./data/users.db:/app/users.db:Z
-      - ./data/keys:/app/keys:ro,Z
+      - ./login-server/index.js:/app/index.js:ro,Z
+      - ./data/users.db:/data/users.db:Z
+      - ./data/keys:/data/keys:ro,Z
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/action.php"]
       interval: 10s
@@ -64,6 +65,10 @@ services:
       - SHOWDOWN_WS_URL=${BOT_WS_URL:-ws://ps-server:8000/showdown/websocket}
       - SHOWDOWN_AUTH_URL=${BOT_AUTH_URL:-http://login:3001/api/action.php?}
       - SHOWDOWN_LOG_LEVEL=${BOT_LOG_LEVEL:-INFO}
+    volumes:
+      - ../vgc-rl/checkpoints:/app/checkpoints:ro,Z
+      - ../vgc-rl/src:/app/src:ro,Z
+      - ../vgc-rl/teams:/app/teams:ro,Z
 
 volumes:
   caddy_data:

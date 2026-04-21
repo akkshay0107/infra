@@ -52,7 +52,7 @@ Additionally you need **Docker** and **Docker Compose** installed.
    cd login-server
    npm install
    node generate-keys.js
-   node generate-users.js
+   node --env-file=../.env generate-users.js
    ```
    Hacky way right now to support around 250 participants. Will resolve this to a proper auth system with user creation later.
 

@@ -8,13 +8,13 @@ exports.loginserverkeyalgo = "RSA-SHA1";
 exports.loginserverpublickeyid = 1;
 exports.loginserverpublickey =
 	`-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkuI3YkpLCZi56Y+3U69H
-AOC1ikvQzmVIg0bpNlrC/4/IOZ8BuJaBBZyq0AUSYmsdAJGa2lfrrK56fz9SZQXv
-to9lgnSTX97zV3MrvvnAHbYo0Ulu96KaNLOpJTu9eVGSZ5RAmRucYCze2d5pZKDz
-kOULrHNDRHY92KSFEw3eCGKgmWM+WdUsEZSoEBb1nrQ2ZG8BKszFJDJo8HcjtcxE
-gjvnchp1WMQUeYYYsGSAkmBdlUA10v4DzK73yIopQ2isbmAaec44B27pPsxs2NCY
-ithhrLRYOsh6EEM5crlQPXmOzqt1zXRZWStdA4qSGeLYMrf4P5aVomZ2R/JyysOk
-TwIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1rhkcUW0oAcjEqsIr9SR
+8klKeVhPDa5NbEWmqii2YCaL+igZM3Q2ZYFqKFS1L/KpURO69gq/abhdWwiB4+lV
+zI8ZmYXYGxxZCxwwPu4rBKlCq/TCdj3L8ocYFxAz3rcNU0AjUsjxB22cg7dC9SzE
+GbPrw9kSKDhqKrfufag+cNj2ZctVn0i2N01VSM7ViWW8TBdvHreTRDDDDFjPW/VU
+qFCCzJLp11zBZ8bmJGv5e6jE24wdaFqonFzcynoWye2Bzr3zRmokSYPFWT0uYlok
+msnbpVBVfY31zeknrGNYqygkXv1pI/4vcZK2Rv5b29HbW+iso1k+Kh2lIvbr0Ev9
+5wIDAQAB
 -----END PUBLIC KEY-----`;
 
 exports.routes = {

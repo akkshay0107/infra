@@ -38,47 +38,77 @@ function toID(text) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
-app.all('/api/action.php', (req, res) => {
-  const params = req.method === 'POST' ? req.body : req.query;
-  const { act, name, pass, challengekeyid, challenge } = params;
+
+app.all(['/api/action.php', '/action.php', '/api/', '/'], (req, res) => {
+  const params = { ...req.query, ...req.body };
+  let { act, name, pass } = params;
+  let challenge = params.challenge || params.challstr;
+  if (challenge) {
+    challenge = decodeURIComponent(challenge);
+    if (challenge.includes('|')) challenge = challenge.split('|')[1];
+  }
+
+  // Case-insensitive action check
+  act = (act || '').toLowerCase();
 
   if (act === 'login') {
     const userid = toID(name);
 
     if (!db) {
-      return res.send(']' + JSON.stringify({ actionsuccess: false, assertion: '' }));
+      console.log(`Login attempt failed: database not loaded`);
+      return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Database not loaded' }));
+    }
+
+    if (!userid) {
+       console.log(`Login attempt failed: no username provided`);
+       return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'No username provided' }));
     }
 
     db.get('SELECT * FROM users WHERE userid = ?', [userid], (err, row) => {
-      if (err || !row) {
+      if (err) {
+        console.error(`DB Error: ${err.message}`);
+        return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Internal database error' }));
+      }
+      if (!row) {
         console.log(`Failed login: ${userid} (user not found)`);
-        return res.send(']' + JSON.stringify({ actionsuccess: false, assertion: '' }));
+        return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'User not found' }));
       }
 
-      const match = bcrypt.compareSync(pass, row.password_hash);
+      const match = bcrypt.compareSync(pass || '', row.password_hash);
       if (!match) {
         console.log(`Failed login: ${userid} (invalid password)`);
-        return res.send(']' + JSON.stringify({ actionsuccess: false, assertion: '' }));
+        return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Invalid password' }));
       }
 
       const timestamp = Math.floor(Date.now() / 1000);
-      const hostname = 'localhost'; // Or process.env.HOST
+      const hostname = ''; // Empty hostname is safer
       const tokenData = `${challenge},${userid},2,${timestamp},${hostname}`;
 
       const signer = crypto.createSign('RSA-SHA1');
       signer.update(tokenData);
       const sig = signer.sign(privateKey, 'hex');
 
-      console.log(`Successful login: ${userid}`);
+      console.log(`Successful login: ${userid} (${row.username})`);
       return res.send(']' + JSON.stringify({
         actionsuccess: true,
+        curuser: {
+          loggedin: true,
+          userid: userid,
+          username: row.username
+        },
         assertion: `${tokenData};${sig}`
       }));
     });
+  } else if (act === 'upkeep' || act === 'getassertion') {
+    return res.send(']' + JSON.stringify({ actionsuccess: true }));
+  } else if (req.path === '/' || req.path === '/api/') {
+    res.send('Login server is up');
   } else {
+    console.log(`Unknown action: ${act}`);
     res.send(']');
   }
 });
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
