@@ -99,12 +99,13 @@ app.all(['/api/action.php', '/action.php', '/api/', '/'], (req, res) => {
         assertion: `${tokenData};${sig}`
       }));
     });
-  } else if (act === 'upkeep' || act === 'getassertion') {
+  } else if (act === 'upkeep' || act === 'getassertion' || act === 'getteams' || act === 'saveteams') {
+    if (act === 'getteams') return res.send(']' + JSON.stringify([]));
     return res.send(']' + JSON.stringify({ actionsuccess: true }));
   } else if (req.path === '/' || req.path === '/api/') {
     res.send('Login server is up');
   } else {
-    console.log(`Unknown action: ${act}`);
+    if (act) console.log(`Unknown action: ${act}`);
     res.send(']');
   }
 });
