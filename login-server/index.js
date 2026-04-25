@@ -24,7 +24,7 @@ try {
 }
 
 if (fs.existsSync(dbPath)) {
-  db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
+  db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
       console.error(err.message);
     }
@@ -41,7 +41,7 @@ function toID(text) {
 
 app.all(['/api/action.php', '/action.php', '/api/', '/'], (req, res) => {
   const params = { ...req.query, ...req.body };
-  let { act, name, pass } = params;
+  let { act, name, pass, newpass, newname } = params;
   let challenge = params.challenge || params.challstr;
   if (challenge) {
     challenge = decodeURIComponent(challenge);
@@ -98,6 +98,64 @@ app.all(['/api/action.php', '/action.php', '/api/', '/'], (req, res) => {
         },
         assertion: `${tokenData};${sig}`
       }));
+    });
+  } else if (act === 'changepassword') {
+    const userid = toID(name);
+    if (!userid || !pass || !newpass) {
+      return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Missing fields' }));
+    }
+
+    db.get('SELECT * FROM users WHERE userid = ?', [userid], (err, row) => {
+      if (err || !row) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'User not found' }));
+      
+      const match = bcrypt.compareSync(pass, row.password_hash);
+      if (!match) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Invalid current password' }));
+
+      const newHash = bcrypt.hashSync(newpass, 10);
+      db.run('UPDATE users SET password_hash = ? WHERE userid = ?', [newHash, userid], (err) => {
+        if (err) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Database error' }));
+        console.log(`Password changed for user: ${userid}`);
+        return res.send(']' + JSON.stringify({ actionsuccess: true }));
+      });
+    });
+  } else if (act === 'changeusername') {
+    const userid = toID(name);
+    const newuserid = toID(newname);
+    if (!userid || !pass || !newname || !newuserid) {
+      return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Missing fields' }));
+    }
+
+    if (userid === newuserid) {
+       // Just update the display name if the ID is the same (e.g. changing capitalization)
+       db.get('SELECT * FROM users WHERE userid = ?', [userid], (err, row) => {
+         if (err || !row) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'User not found' }));
+         const match = bcrypt.compareSync(pass, row.password_hash);
+         if (!match) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Invalid password' }));
+         
+         db.run('UPDATE users SET username = ? WHERE userid = ?', [newname, userid], (err) => {
+           if (err) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Database error' }));
+           console.log(`Username (display) changed for user: ${userid} to ${newname}`);
+           return res.send(']' + JSON.stringify({ actionsuccess: true, newuserid: userid, newusername: newname }));
+         });
+       });
+       return;
+    }
+
+    db.get('SELECT * FROM users WHERE userid = ?', [newuserid], (err, row) => {
+      if (row) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'New username already taken' }));
+      
+      db.get('SELECT * FROM users WHERE userid = ?', [userid], (err, row) => {
+        if (err || !row) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'User not found' }));
+        
+        const match = bcrypt.compareSync(pass, row.password_hash);
+        if (!match) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Invalid password' }));
+
+        db.run('UPDATE users SET userid = ?, username = ? WHERE userid = ?', [newuserid, newname, userid], (err) => {
+          if (err) return res.send(']' + JSON.stringify({ actionsuccess: false, actionerror: 'Database error' }));
+          console.log(`Username changed: ${userid} -> ${newuserid} (${newname})`);
+          return res.send(']' + JSON.stringify({ actionsuccess: true, newuserid: newuserid, newusername: newname }));
+        });
+      });
     });
   } else if (act === 'upkeep' || act === 'getassertion' || act === 'getteams' || act === 'saveteams') {
     if (act === 'getteams') return res.send(']' + JSON.stringify([]));

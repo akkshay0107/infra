@@ -4,6 +4,9 @@ This repository contains the infrastructure configuration for the Pokemon VGC Re
 
 - **ps-server**: A customized Pokemon Showdown server.
 - **login**: A lightweight Express/LiteSQL server for handling user authentication and session assertions.
+  - Supports `act=login`
+  - Supports `act=changepassword` (requires `name`, `pass`, `newpass`)
+  - Supports `act=changeusername` (requires `name`, `pass`, `newname`)
 - **bot**: A reinforcement learning bot container.
 - **caddy**: Reverse proxy for serving the client and routing traffic to the internal services.
 
